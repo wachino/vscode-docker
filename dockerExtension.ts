@@ -49,7 +49,7 @@ import { ImageNode } from './explorer/models/imageNode';
 import { NodeBase } from './explorer/models/nodeBase';
 import { RootNode } from './explorer/models/rootNode';
 import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
-import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
+import { browseDockerHub, logOut } from './explorer/utils/dockerHubUtils';
 import { ext } from "./extensionVariables";
 import { initializeTelemetryReporter, reporter } from './telemetry/telemetry';
 import { AzureAccount } from './typings/azure-account.api';
@@ -216,7 +216,10 @@ function registerDockerCommands(azureAccount: AzureAccount): void {
     registerCommand('vscode-docker.compose.restart', composeRestart);
     registerCommand('vscode-docker.system.prune', systemPrune);
     registerCommand('vscode-docker.createWebApp', async (context?: AzureImageTagNode | DockerHubImageTagNode) => await createWebApp(context, azureAccount));
-    registerCommand('vscode-docker.dockerHubLogout', dockerHubLogout);
+    registerCommand('vscode-docker.dockerHubLogout', async () => {
+        await logOut();
+        dockerExplorerProvider.refreshRegistries();
+    });
     registerCommand('vscode-docker.browseDockerHub', (context?: DockerHubImageTagNode | DockerHubRepositoryNode | DockerHubOrgNode) => {
         browseDockerHub(context);
     });

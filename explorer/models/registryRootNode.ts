@@ -21,12 +21,14 @@ import { CustomRegistryNode } from './customRegistryNodes';
 import { DockerHubOrgNode } from './dockerHubNodes';
 import { NodeBase } from './nodeBase';
 
+export type RootNodeContextValue = 'dockerHubRootNode' | 'azureRegistryRootNode' | 'customRootNode';
+
 export class RegistryRootNode extends NodeBase {
     private _azureAccount: AzureAccount;
 
     constructor(
         public readonly label: string,
-        public readonly contextValue: 'dockerHubRootNode' | 'azureRegistryRootNode' | 'customRootNode',
+        public readonly contextValue: RootNodeContextValue,
         public readonly eventEmitter: vscode.EventEmitter<NodeBase>,
         public readonly azureAccount?: AzureAccount
     ) {
@@ -70,38 +72,19 @@ export class RegistryRootNode extends NodeBase {
     private async getDockerHubOrgs(): Promise<DockerHubOrgNode[]> {
         const orgNodes: DockerHubOrgNode[] = [];
 
-        let id: { username: string, password: string, token: string } = { username: null, password: null, token: null };
-
-        if (ext.keytar) {
-            id.token = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
-            id.username = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
-            id.password = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
+        let id = await dockerHub.getLoggedInInfo();
+        if (id) {
+            const user: dockerHub.User = await dockerHub.getUser();
+            const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
+            const namespaces = [...new Set(myRepos.map(item => item.namespace))];
+            namespaces.forEach((namespace) => {
+                let node = new DockerHubOrgNode(`${namespace}`);
+                node.userName = id.username;
+                node.password = id.password;
+                node.token = id.token;
+                orgNodes.push(node);
+            });
         }
-
-        if (!id.token) {
-            id = await dockerHub.dockerHubLogin();
-
-            if (id && id.token && ext.keytar) {
-                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey, id.token);
-                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey, id.password);
-                await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey, id.username);
-            } else {
-                return orgNodes;
-            }
-        } else {
-            dockerHub.setDockerHubToken(id.token);
-        }
-
-        const user: dockerHub.User = await dockerHub.getUser();
-        const myRepos: dockerHub.Repository[] = await dockerHub.getRepositories(user.username);
-        const namespaces = [...new Set(myRepos.map(item => item.namespace))];
-        namespaces.forEach((namespace) => {
-            let node = new DockerHubOrgNode(`${namespace}`);
-            node.userName = id.username;
-            node.password = id.password;
-            node.token = id.token;
-            orgNodes.push(node);
-        });
 
         return orgNodes;
     }

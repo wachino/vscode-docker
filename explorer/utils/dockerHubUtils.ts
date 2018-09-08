@@ -13,9 +13,9 @@ import { ext } from '../../extensionVariables';
 import { DockerHubImageTagNode, DockerHubOrgNode, DockerHubRepositoryNode } from '../models/dockerHubNodes';
 import { NodeBase } from '../models/nodeBase';
 
-let _token: Token;
+let _currentToken: Token;
 
-export interface Token {
+interface Token {
     token: string
 }
 
@@ -107,36 +107,49 @@ export interface Manifest {
     schemaVersion: number;
 }
 
-export async function dockerHubLogout(): Promise<void> {
+export async function getLoggedInInfo(): Promise<{ username: string, password: string, token: string } | undefined> {
+    if (ext.keytar) {
+        let token = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
+        let username = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
+        let password = await ext.keytar.getPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
+        if (token && username && password) {
+            _currentToken = { token };
+            return { username, password, token };
+        }
+    }
+
+    return undefined;
+}
+
+export async function logOut(): Promise<void> {
     if (ext.keytar) {
         await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey);
         await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey);
         await ext.keytar.deletePassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey);
     }
-    _token = null;
+    _currentToken = null;
 }
 
-export async function dockerHubLogin(): Promise<{ username: string, password: string, token: string }> {
-
-    const username: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker ID to log in to Docker Hub' });
+export async function logIn(): Promise<void> {
+    const username: string = await ext.ui.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker ID to log in to Docker Hub' });
     if (username) {
-        const password: string = await vscode.window.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker Hub password', password: true });
+        const password: string = await ext.ui.showInputBox({ ignoreFocusOut: true, prompt: 'Please enter your Docker Hub password', password: true });
         if (password) {
-            _token = await login(username, password);
-            if (_token) {
-                return { username: username, password: password, token: <string>_token.token };
+            _currentToken = await performLogin(username, password);
+            if (_currentToken) {
+                if (ext.keytar) {
+                    await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubTokenKey, _currentToken.token);
+                    await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubPasswordKey, password);
+                    await ext.keytar.setPassword(keytarConstants.serviceId, keytarConstants.dockerHubUserNameKey, username);
+                }
             }
         }
     }
 
-    return;
+    return undefined;
 }
 
-export function setDockerHubToken(token: string): void {
-    _token = { token: token };
-}
-
-async function login(username: string, password: string): Promise<Token> {
+async function performLogin(username: string, password: string): Promise<Token> {
     let t: Token;
 
     let options = {
@@ -159,7 +172,7 @@ export async function getUser(): Promise<User> {
         method: 'GET',
         uri: 'https://hub.docker.com/v2/user/',
         headers: {
-            Authorization: 'JWT ' + _token.token
+            Authorization: 'JWT ' + _currentToken.token
         },
         json: true
     }
@@ -186,7 +199,7 @@ export async function getRepositories(username: string): Promise<Repository[]> {
         method: 'GET',
         uri: `https://hub.docker.com/v2/users/${username}/repositories/`,
         headers: {
-            Authorization: 'JWT ' + _token.token
+            Authorization: 'JWT ' + _currentToken.token
         },
         json: true
     }
@@ -208,7 +221,7 @@ export async function getRepositoryInfo(repository: Repository): Promise<Reposit
         method: 'GET',
         uri: `https://hub.docker.com/v2/repositories/${repository.namespace}/${repository.name}/`,
         headers: {
-            Authorization: 'JWT ' + _token.token
+            Authorization: 'JWT ' + _currentToken.token
         },
         json: true
     }
@@ -230,7 +243,7 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
         method: 'GET',
         uri: `https://hub.docker.com/v2/repositories/${repository.namespace}/${repository.name}/tags?page_size=${PAGE_SIZE}&page=1`,
         headers: {
-            Authorization: 'JWT ' + _token.token
+            Authorization: 'JWT ' + _currentToken.token
         },
         json: true
     }
