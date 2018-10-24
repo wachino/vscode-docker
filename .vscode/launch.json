@@ -18,7 +18,7 @@
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			],
-			"preLaunchTask": "npm"
+			"preLaunchTask": "npm: webpack"
 		},
 		{
 			"name": "Launch Tests",
@@ -40,7 +40,7 @@
 			"outFiles": [
 				"${workspaceFolder}/out/test"
 			],
-			"preLaunchTask": "npm",
+			"preLaunchTask": "npm: webpack",
 			"env": {
 				"MOCHA_grep": "", // RegExp of tests to run (empty for all)
 				"MOCHA_enableTimeouts": "0", // Disable time-outs
