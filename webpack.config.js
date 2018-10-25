@@ -5,28 +5,51 @@
 
 //@ts-check
 
-// Webpack documentation: [https://webpack.js.org/configuration/]().
+// Full webpack documentation: [https://webpack.js.org/configuration/]().
 // In short, the config-files defines the entry point of the extension, to use TypeScript, to produce a commonjs-module, and what modules not to bundle.
 
 'use strict';
 
 const path = require('path');
+const webpack = require('webpack');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
     target: 'node', // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
-
-    entry: './dockerExtension.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+    entry: './entry.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
     output: { // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
         path: path.resolve(__dirname, 'dist'),
-        filename: 'dockerExtension.js',
-        libraryTarget: "commonjs2",
+        filename: 'extension.js',
+        libraryTarget: "commonjs",
         devtoolModuleFilenameTemplate: "../[resource-path]",
     },
     devtool: 'source-map',
-    externals: {
-        vscode: "commonjs vscode" // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
-    },
+    externals: [
+        {
+            vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+            //'node_modules/vscode-azureextensionui/out/src/getPackageInfo.js': 'commonjs getPackageInfo'
+        },
+        // /package.json/
+    ],
+    plugins: [
+        // new webpack.DefinePlugin({
+        //     'NICE_FEATURE': JSON.stringify(true),
+        //     'EXPERIMENTAL_FEATURE': JSON.stringify(false)
+        // }),
+        // new webpack.DefinePlugin({
+        //     loadStartTime: 'Date.now()',
+        //     asdf: '1234567',
+        //     abcd: JSON.stringify('abcd')
+        // }),
+        //new webpack.IgnorePlugin(/getPackageInfo/, /vscode-azureextensionui/),
+        new CopyWebpackPlugin([
+            { from: './images/*', to: 'images' },
+            { from: './package.json' }
+            //{ from: 'node_modules/vscode-azureextensionui/out/src/getPackageInfo.js', to: 'node_modules/vscode-azureextensionui/out/src/getPackageInfo.js' }
+        ])
+        //new webpack.ContextReplacementPlugin(/package.json/)
+    ],
     resolve: { // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
         extensions: ['.ts', '.js']
     },
@@ -40,5 +63,10 @@ const config = {
         }]
     },
 }
+
+if (ENV === 'production') {
+    config.plugins.push(new webpack.optimize.UglifyJsPlugin()); // asdf
+}
+
 
 module.exports = config;

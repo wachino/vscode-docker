@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-let loadStartTime = Date.now();
-
 import * as assert from 'assert';
 import * as opn from 'opn';
 import * as path from 'path';
@@ -57,6 +55,7 @@ import { browseAzurePortal } from './explorer/utils/browseAzurePortal';
 import { browseDockerHub, dockerHubLogout } from './explorer/utils/dockerHubUtils';
 import { ext } from "./extensionVariables";
 import { initializeTelemetryReporter, reporter } from './telemetry/telemetry';
+import { TestKeytar } from './test/testKeytar';
 import { AzureAccount } from './typings/azure-account.api';
 import { addUserAgent } from './utils/addUserAgent';
 import { AzureUtilityManager } from './utils/azureUtilityManager';
@@ -90,6 +89,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
         ext.ui = new AzureUserInput(ctx.globalState);
     }
     ext.context = ctx;
+    ext.packageInfo = require('./package.json');
     ext.outputChannel = util.getOutputChannel();
     if (!ext.terminalProvider) {
         ext.terminalProvider = new DefaultTerminalProvider();
@@ -97,7 +97,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     initializeTelemetryReporter(createTelemetryReporter(ctx));
     ext.reporter = reporter;
     if (!ext.keytar) {
-        ext.keytar = Keytar.tryCreate();
+        ext.keytar = new TestKeytar(); //asdf Keytar.tryCreate();
     }
 
     // Set up the user agent for all direct 'request' calls in the extension (must use ext.request)
@@ -106,7 +106,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     ext.request = request.defaults(defaultRequestOptions);
 }
 
-export async function activate(ctx: vscode.ExtensionContext): Promise<void> {
+export async function activate(ctx: vscode.ExtensionContext, loadStartTime, loadEndTime): Promise<void> {
     let activateStartTime = Date.now();
 
     initializeExtensionVariables(ctx);
@@ -305,5 +305,3 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     });
     client.start();
 }
-
-let loadEndTime = Date.now();
