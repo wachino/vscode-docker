@@ -24,7 +24,7 @@ const config = {
         libraryTarget: "commonjs",
         devtoolModuleFilenameTemplate: "../[resource-path]",
     },
-    devtool: 'source-map',
+    // devtool: 'source-map',
     externals: [
         {
             vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
@@ -62,11 +62,14 @@ const config = {
             }]
         }]
     },
+    optimization: {
+        // minimize: true
+    }
 }
 
-if (ENV === 'production') {
-    config.plugins.push(new webpack.optimize.UglifyJsPlugin()); // asdf
-}
+//if (ENV === 'production') {
+//config.plugins.push(new webpack.optimize.UglifyJsPlugin()); // asdf
+//}
 
 
 module.exports = config;
