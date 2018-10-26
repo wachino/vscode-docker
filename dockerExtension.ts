@@ -97,7 +97,7 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     initializeTelemetryReporter(createTelemetryReporter(ctx));
     ext.reporter = reporter;
     if (!ext.keytar) {
-        ext.keytar = new TestKeytar(); // Keytar.tryCreate();
+        ext.keytar = Keytar.tryCreate();
     }
 
     // Set up the user agent for all direct 'request' calls in the extension (must use ext.request)

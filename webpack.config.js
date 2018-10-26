@@ -24,11 +24,11 @@ const config = {
         libraryTarget: "commonjs",
         devtoolModuleFilenameTemplate: "../[resource-path]",
     },
-    // devtool: 'source-map',
+    devtool: 'source-map',
     externals: [
         {
             vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
-            //'node_modules/vscode-azureextensionui/out/src/getPackageInfo.js': 'commonjs getPackageInfo'
+            './getCoreNodeModule': 'commonjs getCoreNodeModule'
         },
         // /package.json/
     ],
@@ -44,8 +44,9 @@ const config = {
         // }),
         //new webpack.IgnorePlugin(/getPackageInfo/, /vscode-azureextensionui/),
         new CopyWebpackPlugin([
-            { from: './images/*', to: 'images' },
-            { from: './package.json' }
+            { from: './images/*' },
+            { from: './package.json' },
+            { from: './utils/getCoreNodeModule.ts', to: './utils' }
             //{ from: 'node_modules/vscode-azureextensionui/out/src/getPackageInfo.js', to: 'node_modules/vscode-azureextensionui/out/src/getPackageInfo.js' }
         ])
         //new webpack.ContextReplacementPlugin(/package.json/)

@@ -16,7 +16,7 @@
 			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
+				"${workspaceFolder}/dist/**/*.js"
 			],
 			"preLaunchTask": "npm: webpack"
 		},
@@ -26,19 +26,14 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				// This isn't currently working on Windows due to https://github.com/Microsoft/vscode/issues/58388#issuecomment-420709179.
-				// To work around it, change to hard-coded local paths with a lower-case drive letter, e.g.:
-				// "c:/Repos/vscode-docker/test/test.code-workspace",
-				// "--extensionDevelopmentPath=c:/Repos/vscode-docker",
-				// "--extensionTestsPath=c:/Repos/vscode-docker/out/test"
 				"${workspaceFolder}/test/test.code-workspace",
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test"
+				"--extensionTestsPath=${workspaceFolder}/out/test" // asdf
 			],
 			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
-				"${workspaceFolder}/out/test"
+				"${workspaceFolder}/out/test" //asdf
 			],
 			"preLaunchTask": "npm: webpack",
 			"env": {
