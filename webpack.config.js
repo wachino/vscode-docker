@@ -42,7 +42,7 @@ const config = {
         //     asdf: '1234567',
         //     abcd: JSON.stringify('abcd')
         // }),
-        //new webpack.IgnorePlugin(/getPackageInfo/, /vscode-azureextensionui/),
+        //new webpack.IgnorePlugin(/ab/, /.+/),
         new CopyWebpackPlugin([
             { from: './images/*' },
             { from: './package.json' },
@@ -55,13 +55,23 @@ const config = {
         extensions: ['.ts', '.js']
     },
     module: {
-        rules: [{
-            test: /\.ts$/,
-            exclude: /node_modules/,
-            use: [{
-                loader: 'ts-loader',
-            }]
-        }]
+        rules: [
+            {
+                test: /\.ts$/,
+                exclude: /node_modules/,
+                use: [{
+                    loader: 'ts-loader',
+                }]
+            },
+            {
+                // vscode-nls-dev loader:
+                // * rewrite nls-calls
+                loader: 'vscode-nls-dev/lib/webpack-loader',
+                options: {
+                    base: path.join(__dirname, 'src')
+                }
+            }
+        ]
     },
     optimization: {
         // minimize: true
