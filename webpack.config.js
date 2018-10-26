@@ -46,7 +46,7 @@ const config = {
         new CopyWebpackPlugin([
             { from: './images/*' },
             { from: './package.json' },
-            { from: './utils/getCoreNodeModule.ts', to: './utils' }
+            { from: './utils/getCoreNodeModule.js', to: './node_modules' }
             //{ from: 'node_modules/vscode-azureextensionui/out/src/getPackageInfo.js', to: 'node_modules/vscode-azureextensionui/out/src/getPackageInfo.js' }
         ])
         //new webpack.ContextReplacementPlugin(/package.json/)
