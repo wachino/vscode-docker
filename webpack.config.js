@@ -28,7 +28,9 @@ const config = {
     externals: [
         {
             vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
-            './getCoreNodeModule': 'commonjs getCoreNodeModule'
+            './getCoreNodeModule': 'commonjs getCoreNodeModule',
+            //'./serviceClient': 'commonjs serviceClient',
+            'ms-rest': 'commonjs ms-rest'
         },
         // /package.json/
     ],
@@ -46,7 +48,8 @@ const config = {
         new CopyWebpackPlugin([
             { from: './images/*' },
             { from: './package.json' },
-            { from: './utils/getCoreNodeModule.js', to: './node_modules' }
+            { from: './utils/getCoreNodeModule.js', to: './node_modules' },
+            { from: './node_modules/ms-rest', to: './node_modules/ms-rest' }
             //{ from: 'node_modules/vscode-azureextensionui/out/src/getPackageInfo.js', to: 'node_modules/vscode-azureextensionui/out/src/getPackageInfo.js' }
         ])
         //new webpack.ContextReplacementPlugin(/package.json/)
@@ -62,15 +65,15 @@ const config = {
                 use: [{
                     loader: 'ts-loader',
                 }]
-            },
-            {
+            }
+            /*{
                 // vscode-nls-dev loader:
                 // * rewrite nls-calls
                 loader: 'vscode-nls-dev/lib/webpack-loader',
                 options: {
                     base: path.join(__dirname, 'src')
                 }
-            }
+            }*/
         ]
     },
     optimization: {

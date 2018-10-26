@@ -7,3 +7,6 @@ tsconfig.json
 test/**
 testOutput/**
 .github/**
+node_modules/**
+src/**
+out/**

@@ -729,7 +729,6 @@
   },
   "scripts": {
     "vscode:prepublish": "webpack --mode production",
-    "vscode:prepublish.asdf": "tsc -p ./",
     "build": "tsc -p ./",
     "compile": "tsc -watch -p ./",
     "lint": "tslint --project tsconfig.json -t verbose",
