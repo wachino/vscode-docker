@@ -3,6 +3,68 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+let originalRequire: NodeRequireFunction = module.require;
+// tslint:disable-next-line:no-var-requires
+const moduleModule = require("module");
+originalRequire = originalRequire = moduleModule.prototype.require;
+
+let loadTimes = new Map<string, IEntry>();
+let totalLoadTime: number = 0;
+
+let level = 0;
+
+interface IEntry {
+    path: string,
+    time: number,
+    level: number
+}
+
+declare function __webpack_require__(moduleId: string): {};
+
+// tslint:disable-next-line:no-function-expression no-any no-var-requires
+require("module").prototype.require = function (id: string): any {
+    // tslint:disable-next-line:no-invalid-this
+
+    if (id.indexOf('/') < 0) {
+        return __webpack_require__(id + ' sync recursive');
+    }
+
+    return originalRequire.apply(this, arguments);
+
+    // if (String(this.filename).includes('vscode-docker')) {
+    //     let start = Date.now();
+    //     level;
+    //     // tslint:disable-next-line:no-invalid-this
+    //     let ret = originalRequire.apply(this, arguments);
+    //     level--;
+    //     let end = Date.now();
+
+    //     let modulePath: string;
+    //     if (id === 'vscode') {
+    //         modulePath = 'vscode';
+    //     } else {
+    //         // tslint:disable-next-line:no-invalid-this
+    //         modulePath = moduleModule._resolveFilename(id, this);
+    //     }
+    //     //console.warn(`${level}: module.filename loaded ${modulePath}`);
+
+    //     let loadTime = end - start;
+    //     if (!loadTimes.get(modulePath)) {
+    //         loadTimes.set(modulePath, { path: modulePath, time: loadTime, level: level });
+    //         totalLoadTime = loadTime;
+    //         //console.log(loadTime);
+    //     } else {
+    //         //console.log(`Already loaded: ${loadTime}`);
+    //     }
+
+    //     return ret;
+    // } else {
+    //     // tslint:disable-next-line:no-invalid-this
+    //     return originalRequire.apply(this, arguments);
+    // }
+}
+
+
 import * as assert from 'assert';
 import * as opn from 'opn';
 import * as path from 'path';
