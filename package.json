@@ -737,7 +737,7 @@
     "test": "npm run build && cross-env CODE_TESTS_WORKSPACE=./test/test.code-workspace DEBUGTELEMETRY=1 node ./node_modules/vscode/bin/test",
     "all": "npm i && npm run lint && npm test",
     "webpack": "webpack --mode development",
-    "webpack-dev": "webpack --mode development --watch"
+    "webpack-watch": "webpack --mode development --watch"
   },
   "extensionDependencies": [
     "vscode.docker",
@@ -768,6 +768,7 @@
     "webpack": "^4.19.1",
     "webpack-cli": "^3.1.0"
   },
+  "asdf": null,
   "dependencies": {
     "azure-arm-containerregistry": "^2.3.0",
     "azure-arm-resource": "^2.0.0-preview",

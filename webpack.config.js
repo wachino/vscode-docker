@@ -14,6 +14,8 @@ const path = require('path');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+const ENV = process.env.NODE_ENV = process.env.ENV = 'production';
+
 /**@type {import('webpack').Configuration}*/
 const config = {
     target: 'node', // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
@@ -35,6 +37,14 @@ const config = {
         // /package.json/
     ],
     plugins: [
+        // new webpack.NoEmitOnErrorsPlugin(),
+        // // extracts embedded css as external files, adding cache-busting hash to the filename.
+        // new ExtractTextPlugin('[name].[hash].css'),
+        // new webpack.DefinePlugin({
+        //     'process.env': {
+        //         'ENV': JSON.stringify(ENV)
+        //     }
+        // }),
         // new webpack.DefinePlugin({
         //     'NICE_FEATURE': JSON.stringify(true),
         //     'EXPERIMENTAL_FEATURE': JSON.stringify(false)
@@ -49,10 +59,33 @@ const config = {
             { from: './images/*' },
             { from: './package.json' },
             { from: './utils/getCoreNodeModule.js', to: './node_modules' },
-            { from: './node_modules/ms-rest', to: './node_modules/ms-rest' }
-            //{ from: 'node_modules/vscode-azureextensionui/out/src/getPackageInfo.js', to: 'node_modules/vscode-azureextensionui/out/src/getPackageInfo.js' }
+            { from: './node_modules/ms-rest', to: './node_modules/ms-rest' },
+            //{ from: './node_modules/uuid', to: './node_modules/uuid' }
         ])
-        //new webpack.ContextReplacementPlugin(/package.json/)
+        // new webpack.ContextReplacementPlugin(
+        //     // The criterion to search: './node_modules/ms-rest/lib sync recursive'
+        //     ///.\/node_modules\/ms-rest\/lib/,
+        //     /node_modules\/ms-rest/,
+
+        //     // The new directory to look for the files
+        //     path.resolve(__dirname, 'node_modules/ms-rest'),
+
+        //     // The new recursive flag. True by default.
+        //     // Pass false to disable recursive lookup
+        //     //false,
+
+        //     // The new regular expression to match
+        //     // and import the files.
+        //     // Specify the mapping in form of
+        //     // { runtime request : compile-time request }
+        //     // IMPORTANT: runtime request should exactly match
+        //     // the text that is passed into `require()`
+        //     // IMPORTANT: compile-time request should be relative
+        //     // to the directory from the previous parameter
+        //     {
+        //         'package.json': 'package.json'
+        //     }
+        //)
     ],
     resolve: { // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
         extensions: ['.ts', '.js']
@@ -77,7 +110,7 @@ const config = {
         ]
     },
     optimization: {
-        // minimize: true
+        // minimize: process.env. ENV === 'production'
     }
 }
 
